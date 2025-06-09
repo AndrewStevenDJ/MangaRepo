@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MiMangaBot.Data;
 using MiMangaBot.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace MiMangaBot.Controllers
 {
@@ -15,10 +16,34 @@ namespace MiMangaBot.Controllers
             _context = context;
         }
 
+        // GET api/mangas?id=1&titulo=naruto&autor=toriyama&anio=1999
         [HttpGet]
-        public ActionResult<IEnumerable<Manga>> GetMangas()
+        public ActionResult<IEnumerable<Manga>> GetMangas(
+            [FromQuery] int? id,
+            [FromQuery] string? titulo,
+            [FromQuery] string? autor,
+            [FromQuery] int? anio)
         {
-            return _context.Mangas.ToList();
+            var query = _context.Mangas.AsQueryable();
+
+            if (id.HasValue)
+                query = query.Where(m => m.Id == id.Value);
+
+            if (!string.IsNullOrEmpty(titulo))
+                query = query.Where(m => EF.Functions.Like(m.Titulo, $"%{titulo}%"));
+
+            if (!string.IsNullOrEmpty(autor))
+                query = query.Where(m => EF.Functions.Like(m.Autor, $"%{autor}%"));
+
+            if (anio.HasValue)
+                query = query.Where(m => m.Anio == anio.Value);
+
+            var resultado = query.ToList();
+
+            if (resultado.Count == 0)
+                return NotFound("No se encontraron mangas con esos criterios.");
+
+            return resultado;
         }
 
         [HttpPost]
