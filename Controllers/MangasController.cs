@@ -16,18 +16,20 @@ namespace MiMangaBot.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Manga>>> GetMangas(
+        public async Task<ActionResult<PaginacionRespuesta<Manga>>> GetMangas(
             [FromQuery] int? id,
             [FromQuery] string? titulo,
             [FromQuery] string? autor,
-            [FromQuery] int? anio)
+            [FromQuery] int? anio,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
-            var resultado = await _mangaService.ObtenerMangasAsync(id, titulo, autor, anio);
+            var resultado = await _mangaService.ObtenerMangasAsync(id, titulo, autor, anio, page, pageSize);
 
-            if (resultado.Count == 0)
+            if (resultado.Datos.Count == 0)
                 return NotFound("No se encontraron mangas con esos criterios.");
 
-            return resultado;
+            return Ok(resultado);
         }
 
         [HttpPost]
