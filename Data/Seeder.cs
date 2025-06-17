@@ -53,13 +53,15 @@ namespace MiMangaBot.Data
 
                 titulosExistentes.Add(titulo);
 
+                var genero = faker.PickRandom(generos);
+
                 mangasParaAgregar.Add(new Manga
                 {
                     Titulo = titulo,
                     Autor = faker.Name.FullName(),
-
                     Anio = faker.Date.Past(20).Year,
-                    GeneroId = faker.PickRandom(generos).Id
+                    GeneroId = genero.Id,
+                    Genero = genero // 🔧 Aquí está la línea clave
                 });
             }
 

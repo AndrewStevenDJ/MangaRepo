@@ -13,8 +13,8 @@ namespace MiMangaBot.Services
             _context = context;
         }
 
-        // Método con paginación y metadatos
-        public async Task<PaginacionRespuesta<Manga>> ObtenerMangasAsync(
+        // Método con paginación y metadatos que devuelve DTO
+        public async Task<PaginacionRespuesta<MangaDto>> ObtenerMangasAsync(
             int? id,
             string? titulo,
             string? autor,
@@ -22,7 +22,9 @@ namespace MiMangaBot.Services
             int page = 1,
             int pageSize = 10)
         {
-            var query = _context.Mangas.AsQueryable();
+            var query = _context.Mangas
+                .Include(m => m.Genero) // Incluye relación con Género
+                .AsQueryable();
 
             if (id.HasValue)
                 query = query.Where(m => m.Id == id.Value);
@@ -42,9 +44,18 @@ namespace MiMangaBot.Services
             var datos = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
+                .Select(m => new MangaDto
+                {
+                    Id = m.Id,
+                    Titulo = m.Titulo,
+                    Autor = m.Autor,
+                    GeneroId = m.GeneroId,
+                    GeneroNombre = m.Genero.Nombre,
+                    Anio = m.Anio
+                })
                 .ToListAsync();
 
-            return new PaginacionRespuesta<Manga>
+            return new PaginacionRespuesta<MangaDto>
             {
                 Datos = datos,
                 PaginaActual = page,

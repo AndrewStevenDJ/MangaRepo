@@ -15,8 +15,9 @@ namespace MiMangaBot.Controllers
             _mangaService = mangaService;
         }
 
+        // Modificado para usar MangaDto
         [HttpGet]
-        public async Task<ActionResult<PaginacionRespuesta<Manga>>> GetMangas(
+        public async Task<ActionResult<PaginacionRespuesta<MangaDto>>> GetMangas(
             [FromQuery] int? id,
             [FromQuery] string? titulo,
             [FromQuery] string? autor,
