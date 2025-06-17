@@ -35,17 +35,22 @@ builder.Services.AddScoped<MangaService>();
 
 var app = builder.Build();
 
-// Ejecutar seeder al iniciar
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<MangaContext>();
     
-    // Aplicar migraciones (opcional pero recomendado)
     context.Database.Migrate();
 
-    // Ejecutar Seeder con cantidad deseada
-    var seeder = new Seeder(context);
-    await seeder.SeedAsync(500); // Cambia 500 por el número que necesites
+    if (args.Length > 0 && int.TryParse(args[0], out int cantidadMangasParaAgregar))
+    {
+        var seeder = new Seeder(context);
+        await seeder.SeedAsync(cantidadMangasParaAgregar);
+        Console.WriteLine($"Se agregaron {cantidadMangasParaAgregar} mangas.");
+    }
+    else
+    {
+        Console.WriteLine("No se agregaron mangas porque no se proporcionó una cantidad válida.");
+    }
 }
 
 // Middleware

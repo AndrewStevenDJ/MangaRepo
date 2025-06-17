@@ -36,20 +36,34 @@ namespace MiMangaBot.Data
             // 2. Cargar géneros existentes desde la base de datos
             generos = await _context.Generos.ToListAsync();
 
-            // 3. Si ya hay mangas, no hacemos nada
-            if (await _context.Mangas.AnyAsync())
-                return;
+            // 3. Cargar títulos existentes para evitar duplicados
+            var titulosExistentes = new HashSet<string>(await _context.Mangas.Select(m => m.Titulo).ToListAsync());
 
             // 4. Faker para mangas
-            var mangaFaker = new Faker<Manga>()
-                .RuleFor(m => m.Titulo, f => f.UniqueIndex.ToString() + " - " + f.Lorem.Sentence(3).TrimEnd('.'))
-                .RuleFor(m => m.Autor, f => f.Person.FullName)
-                .RuleFor(m => m.Anio, f => f.Date.Past(20).Year)
-                .RuleFor(m => m.GeneroId, f => f.PickRandom(generos).Id);
+            var faker = new Faker();
 
-            var mangas = mangaFaker.Generate(cantidad);
+            var mangasParaAgregar = new List<Manga>();
 
-            _context.Mangas.AddRange(mangas);
+            while (mangasParaAgregar.Count < cantidad)
+            {
+                var titulo = faker.UniqueIndex + " - " + faker.Lorem.Sentence(3).TrimEnd('.');
+
+                if (titulosExistentes.Contains(titulo))
+                    continue;
+
+                titulosExistentes.Add(titulo);
+
+                mangasParaAgregar.Add(new Manga
+                {
+                    Titulo = titulo,
+                    Autor = faker.Name.FullName(),
+
+                    Anio = faker.Date.Past(20).Year,
+                    GeneroId = faker.PickRandom(generos).Id
+                });
+            }
+
+            _context.Mangas.AddRange(mangasParaAgregar);
             await _context.SaveChangesAsync();
 
             Console.WriteLine($"✅ Se insertaron {cantidad} mangas correctamente.");
