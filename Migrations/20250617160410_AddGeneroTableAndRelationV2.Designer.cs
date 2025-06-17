@@ -2,6 +2,7 @@
 using MiMangaBot.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MiMangaBot.Migrations
 {
     [DbContext(typeof(MangaContext))]
-    partial class MangaContextModelSnapshot : ModelSnapshot
+    [Migration("20250617160410_AddGeneroTableAndRelationV2")]
+    partial class AddGeneroTableAndRelationV2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected void BuildTargetModel(ModelBuilder modelBuilder) // <--- quitar override
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -1,23 +1,44 @@
 using Bogus;
-using MiMangaBot.Data; 
-using MiMangaBot.Models; // Reemplaza con el namespace real donde está tu clase Manga
-// Asegúrate que este `using` tenga tu espacio de nombres real
+using MiMangaBot.Models;
+using Microsoft.EntityFrameworkCore;
 
-public static class Seeder
+namespace MiMangaBot.Data
 {
-    public static void InsertarMangas(MangaContext context, int cantidad)
+    public static class Seeder
     {
-        var generos = new[] { "Shonen", "Shojo", "Seinen", "Josei", "Aventura", "Misterio", "Terror", "Acción", "Fantasía", "Comedia" };
+        public static async Task SeedAsync(MangaContext context)
+        {
+            // Asegúrate de aplicar migraciones antes de sembrar
+            await context.Database.MigrateAsync();
 
-        var faker = new Faker<Manga>()
-            .RuleFor(m => m.Titulo, f => f.Lorem.Sentence(3))
-            .RuleFor(m => m.Autor, f => f.Name.FullName())
-            .RuleFor(m => m.Genero, f => f.PickRandom(generos))
-            .RuleFor(m => m.Anio, f => f.Date.Past(30).Year);
+            // Solo insertar si no hay géneros ni mangas
+            if (!context.Generos.Any() && !context.Mangas.Any())
+            {
+                // 1. Crear lista de géneros
+                var generos = new List<Genero>
+                {
+                    new Genero { Nombre = "Acción" },
+                    new Genero { Nombre = "Comedia" },
+                    new Genero { Nombre = "Drama" },
+                    new Genero { Nombre = "Fantasía" },
+                    new Genero { Nombre = "Terror" }
+                };
 
-        var mangas = faker.Generate(cantidad);
+                context.Generos.AddRange(generos);
+                await context.SaveChangesAsync();
 
-        context.Mangas.AddRange(mangas);
-        context.SaveChanges();
+                // 2. Crear mangas con Faker y asignarles un GeneroId aleatorio
+                var mangaFaker = new Faker<Manga>()
+                    .RuleFor(m => m.Titulo, f => f.Lorem.Sentence(3))
+                    .RuleFor(m => m.Autor, f => f.Person.FullName)
+                    .RuleFor(m => m.Anio, f => f.Date.Past(20).Year)
+                    .RuleFor(m => m.GeneroId, f => f.PickRandom(generos).Id);
+
+                var mangas = mangaFaker.Generate(20); // Puedes cambiar el número
+
+                context.Mangas.AddRange(mangas);
+                await context.SaveChangesAsync();
+            }
+        }
     }
 }

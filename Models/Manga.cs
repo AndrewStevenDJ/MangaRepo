@@ -5,7 +5,9 @@ namespace MiMangaBot.Models
         public int Id { get; set; }
         public required string Titulo { get; set; }
         public required string Autor { get; set; }
-        public required string Genero { get; set; }
         public int Anio { get; set; }
+
+        public int GeneroId { get; set; }                  // Clave foránea
+        public required Genero Genero { get; set; }        // Navegación con 'required' ✅
     }
 }

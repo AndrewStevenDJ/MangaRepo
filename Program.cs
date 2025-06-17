@@ -1,6 +1,6 @@
 using Microsoft.OpenApi.Models;
 using MiMangaBot.Data;
-using MiMangaBot.Services; // <-- IMPORTANTE: agrega este using
+using MiMangaBot.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,12 +29,19 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<MangaContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
-// ✅ Registro del servicio
+// Servicios
 builder.Services.AddScoped<MangaService>();
 
 var app = builder.Build();
 
-// Swagger
+// ✅ Ejecutar el seeder automático al iniciar
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<MangaContext>();
+    await Seeder.SeedAsync(db);
+}
+
+// Middleware
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -45,24 +52,5 @@ app.UseHttpsRedirection();
 app.UseCors("AllowLocalhost5188");
 app.UseAuthorization();
 app.MapControllers();
-
-// Bloque para generar mangas desde consola
-if (args.Length >= 2 && args[0] == "generar")
-{
-    if (int.TryParse(args[1], out int cantidad))
-    {
-        using (var scope = app.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<MangaContext>();
-            Seeder.InsertarMangas(db, cantidad);
-            Console.WriteLine($"Se generaron {cantidad} mangas.");
-        }
-    }
-    else
-    {
-        Console.WriteLine("Cantidad inválida. Usa: dotnet run generar 10");
-    }
-    return;
-}
 
 app.Run();
