@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
+// Servicios
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -25,20 +26,26 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Base de datos
+// DbContext
 builder.Services.AddDbContext<MangaContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
-// Servicios
+// Servicios adicionales
 builder.Services.AddScoped<MangaService>();
 
 var app = builder.Build();
 
-// ✅ Ejecutar el seeder automático al iniciar
+// Ejecutar seeder al iniciar
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<MangaContext>();
-    await Seeder.SeedAsync(db);
+    var context = scope.ServiceProvider.GetRequiredService<MangaContext>();
+    
+    // Aplicar migraciones (opcional pero recomendado)
+    context.Database.Migrate();
+
+    // Ejecutar Seeder con cantidad deseada
+    var seeder = new Seeder(context);
+    await seeder.SeedAsync(500); // Cambia 500 por el número que necesites
 }
 
 // Middleware
