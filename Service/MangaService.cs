@@ -100,7 +100,7 @@ namespace MiMangaBot.Services
 
             mangaExistente.Titulo = mangaActualizado.Titulo;
             mangaExistente.Autor = mangaActualizado.Autor;
-            mangaExistente.Genero = mangaActualizado.Genero;
+            mangaExistente.GeneroId = mangaActualizado.GeneroId;
             mangaExistente.Anio = mangaActualizado.Anio;
 
             await _context.SaveChangesAsync();

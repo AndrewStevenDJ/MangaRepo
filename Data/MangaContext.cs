@@ -10,18 +10,13 @@ namespace MiMangaBot.Data
         }
 
         public DbSet<Manga> Mangas { get; set; }
-        public DbSet<Genero> Generos { get; set; } // 👈 NUEVO
+        public DbSet<Genero> Generos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configuración de la relación Manga - Genero
-            modelBuilder.Entity<Manga>()
-                .HasOne(m => m.Genero)
-                .WithMany(g => g.Mangas)
-                .HasForeignKey(m => m.GeneroId)
-                .OnDelete(DeleteBehavior.Restrict); // Puedes usar Cascade o Restrict
+    
         }
     }
 }
