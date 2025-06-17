@@ -8,7 +8,6 @@ namespace MiMangaBot.Models
         public int GeneroId { get; set; }
         public int Anio { get; set; }
 
-        public required Genero Genero { get; set; }  // <--- Agrega esta línea
+        public Genero? Genero { get; set; }  // <--- Ahora opcional
     }
 }
-

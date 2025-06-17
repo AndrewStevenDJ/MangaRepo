@@ -32,6 +32,8 @@ builder.Services.AddDbContext<MangaContext>(options =>
 
 // Servicios adicionales
 builder.Services.AddScoped<MangaService>();
+builder.Services.AddScoped<GeneroService>();
+
 
 var app = builder.Build();
 
