@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MiMangaBot.Models;
 using MiMangaBot.Services;
 
 namespace MiMangaBot.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class MangasController : ControllerBase
@@ -15,8 +17,12 @@ namespace MiMangaBot.Controllers
             _mangaService = mangaService;
         }
 
-        // Modificado para usar MangaDto
+        /// <summary>
+        /// Obtiene una lista paginada de mangas filtrados.
+        /// </summary>
         [HttpGet]
+        [ProducesResponseType(typeof(PaginacionRespuesta<MangaDto>), 200)]
+        [ProducesResponseType(404)]
         public async Task<ActionResult<PaginacionRespuesta<MangaDto>>> GetMangas(
             [FromQuery] int? id,
             [FromQuery] string? titulo,
@@ -33,14 +39,27 @@ namespace MiMangaBot.Controllers
             return Ok(resultado);
         }
 
+        /// <summary>
+        /// Crea un nuevo manga.
+        /// </summary>
         [HttpPost]
-        public async Task<ActionResult<Manga>> PostManga(Manga manga)
+        [ProducesResponseType(typeof(Manga), 201)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<Manga>> PostManga([FromBody] Manga manga)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var nuevoManga = await _mangaService.CrearMangaAsync(manga);
             return CreatedAtAction(nameof(GetMangas), new { id = nuevoManga.Id }, nuevoManga);
         }
 
+        /// <summary>
+        /// Elimina mangas por ID o título.
+        /// </summary>
         [HttpDelete]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> DeleteMangaByQuery(
             [FromQuery] int? id,
             [FromQuery] string? titulo)
@@ -53,7 +72,12 @@ namespace MiMangaBot.Controllers
             return Ok($"{eliminados.Count} manga(s) eliminado(s).");
         }
 
+        /// <summary>
+        /// Actualiza un manga por ID o título.
+        /// </summary>
         [HttpPut("actualizar")]
+        [ProducesResponseType(typeof(Manga), 200)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> UpdateManga(
             [FromQuery] int? id,
             [FromQuery] string? titulo,

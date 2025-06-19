@@ -13,7 +13,6 @@ namespace MiMangaBot.Services
             _context = context;
         }
 
-        // Método con paginación y metadatos que devuelve DTO
         public async Task<PaginacionRespuesta<MangaDto>> ObtenerMangasAsync(
             int? id,
             string? titulo,
@@ -23,7 +22,7 @@ namespace MiMangaBot.Services
             int pageSize = 10)
         {
             var query = _context.Mangas
-                .Include(m => m.Genero) // Incluye relación con Género
+                .Include(m => m.Genero)
                 .AsQueryable();
 
             if (id.HasValue)
@@ -50,7 +49,7 @@ namespace MiMangaBot.Services
                     Titulo = m.Titulo,
                     Autor = m.Autor,
                     GeneroId = m.GeneroId,
-                    GeneroNombre = m.Genero.Nombre,
+                    GeneroNombre = m.Genero != null ? m.Genero.Nombre : string.Empty,
                     Anio = m.Anio
                 })
                 .ToListAsync();
@@ -103,7 +102,8 @@ namespace MiMangaBot.Services
             }
             else if (!string.IsNullOrWhiteSpace(titulo))
             {
-                mangaExistente = await _context.Mangas.FirstOrDefaultAsync(m => m.Titulo.ToLower() == titulo.ToLower());
+                mangaExistente = await _context.Mangas
+                    .FirstOrDefaultAsync(m => EF.Functions.Like(m.Titulo, titulo));
             }
 
             if (mangaExistente == null)
