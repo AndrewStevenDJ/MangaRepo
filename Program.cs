@@ -47,12 +47,12 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// CORS
+// CORS global: Permitir a todos
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocalhost5188", policy =>
+    options.AddPolicy("PermitirTodos", policy =>
     {
-        policy.WithOrigins("http://localhost:5188")
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -133,7 +133,7 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseHttpsRedirection();
-app.UseCors("AllowLocalhost5188");
+app.UseCors("PermitirTodos"); // ← política abierta para todos
 
 app.UseAuthentication(); // IMPORTANTE
 app.UseAuthorization();
